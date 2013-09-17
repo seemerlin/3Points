@@ -17,9 +17,9 @@ function Triangle(a, b, c)
 
     this.draw = function()
     {
-        var color =  'rgb(255,0,0);';
-        if(this.hover) color = 'rgb(0,255,0);';
-        if(this.selected) color = 'rgb(0,0,255);';
+        var color =  'rgba(33,33,33,.5);';
+        if(this.hover) color = 'rgba(0,255,0,.5);';
+        if(this.selected) color = 'rgba(0,0,255.5);';
 
         _context.beginPath();
         _context.moveTo(a.x, a.y);
@@ -27,7 +27,7 @@ function Triangle(a, b, c)
         _context.lineTo(c.x, c.y);
         _context.lineTo(a.x, a.y);
         _context.strokeStyle = color;
-        _context.lineHeight = 1;
+        _context.lineHeight = 0.5;
         _context.stroke();
         _context.closePath();
     };

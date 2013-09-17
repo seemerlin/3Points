@@ -53,6 +53,12 @@ var _mouse = new Mouse();
 
 var _keyCode = false;
 
+var hover_points = [];
+var hover_triangles = [];
+
+var selected_points = [];
+var selected_triangles = [];
+
 var points = [];
 var triangles = [];
 
@@ -68,21 +74,17 @@ function mousedown(evt)
 {
     _debug.log('mousedown');
 
-    switch(_keyCode)
+    if(hover_points.length)
     {
-        case 83: // s - select point
+        for(var p = 0; p < hover_points.length; p++)
         {
-            console.log('select point');
-            for(var p = 0; p < points.length; p++)
-            {
-                if(points[p].hover)
-                {
-                    points[p].selected = !points[p].selected;
-                }
-            }
-
-            break;
+            points[hover_points[p]].selected = !points[hover_points[p]].selected;
         }
+    }
+    else
+    {
+        // add new point
+        points.push( new Point(_mouse.x, _mouse.y) );
     }
 }
 
@@ -91,26 +93,23 @@ function mousemove(evt)
     _debug.log('mousemove');
     _mouse.mousemove(evt);
 
+    hover_points = [];
+    for(var p = 0; p < points.length; p++)
+    {
+        // TODO: Add snap point to external config
+        if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 10 && !points[p].selected) // snap point
+        {
+            points[p].hover = true;
+            hover_points.push(p);
+        }
+        else
+        {
+            points[p].hover = false;
+        }
+    }
+
     switch(_keyCode)
     {
-        case 83: // s - select point
-        {
-            for(var p = 0; p < points.length; p++)
-            {
-                // TODO: Add snap point to external config
-                if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 10) // snap point
-                {
-                    points[p].hover = true;
-                }
-                else
-                {
-                    points[p].hover = false;
-                }
-            }
-
-            break;
-        }
-
         case 70: // f - select triangle
         {
             for(var t = 0; t < triangles.length; t++)
@@ -144,19 +143,26 @@ function keydown(evt)
 
     switch(evt.keyCode)
     {
-        case 65:    // a - add point
-        {
-            points.push( new Point(_mouse.x, _mouse.y) );
-
-            break;
-        }
-
         case 67:    // c - clear
         {
             for(var p = 0; p < points.length; p++)
             {
                 points[p].hover = false;
                 points[p].selected = false;
+            }
+
+            break;
+        }
+
+        case 88:    // x - remove point
+        {
+            for(var p = 0; p < points.length; p++)
+            {
+                if(points[p].selected)
+                {
+                    points.remove(p);
+                    p = 0;
+                }
             }
 
             break;
@@ -186,20 +192,6 @@ function keydown(evt)
             else
             {
                 _debug.log('Invalid point count ' + selected_points);
-            }
-
-            break;
-        }
-
-        case 88:    // x - remove point
-        {
-            for(var p = 0; p < points.length; p++)
-            {
-                if(points[p].selected)
-                {
-                    points.remove(p);
-                    p = 0;
-                }
             }
 
             break;

@@ -17,7 +17,7 @@ function Point(x, y)
     this.draw = function()
     {
         _context.fillStyle = 'rgb(255,0,0)';
-        _context.fillRect(this.x, this.y, 1, 1);
+        _context.fillRect(this.x-0.5, this.y-0.5, 2, 2);
 
         var color =  'rgb(255,0,0);';
         if(this.hover) color = 'rgb(255,0,0);';
