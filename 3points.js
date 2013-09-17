@@ -64,6 +64,38 @@ var active_points = [];
 var points = [];
 var triangles = [];
 
+function searchPoint(point)
+{
+    for(var i = 0; i < points.length; i++)
+    {
+        if(points[i].equal( point ))
+        {
+            return i;
+        }
+    }
+}
+
+function mergePoints()
+{
+    for(var i = 0; i < points.length; i++)
+    {
+        for(var j = 0; j < points.length; j++)
+        {
+            if(i != j) // skip self
+            {
+                // TODO: Add snap point to external config
+                if(points[i].distance(points[j]) < 9)
+                {
+                    points.remove(j);
+                    i = 0;
+
+                    break;
+                }
+            }
+        }
+    }
+}
+
 function run()
 {
     init();
@@ -110,7 +142,9 @@ function mousedown(evt)
     else
     {
         points.push( new Point(_mouse.x, _mouse.y) );
-        active_points.push(points.length);
+        active_points.push(points.length - 1);
+
+        mergePoints();
     }
 
     move_active_points = false;
@@ -137,7 +171,7 @@ function mousemove(evt)
     for(var p = 0; p < points.length; p++)
     {
         // TODO: Add snap point to external config
-        if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 10) // snap point
+        if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 9) // snap point
         {
             points[p].hover = true;
             hover_points.push(p);
@@ -194,6 +228,8 @@ function mouseup(evt)
     }
 
     active_points = [];
+
+    mergePoints();
 }
 
 function keydown(evt)
@@ -221,6 +257,21 @@ function keydown(evt)
             {
                 if(points[p].selected)
                 {
+                    // validate triangles
+                    for(var i = 0; i < triangles.length; i++)
+                    {
+                        console.log('a ' + triangles[i].a.equal(points[p]) + ' b ' + triangles[i].b.equal(points[p]) + ' c ' + triangles[i].c.equal(points[p]))
+                        if( triangles[i].a.equal(points[p]) ||
+                            triangles[i].b.equal(points[p]) ||
+                            triangles[i].c.equal(points[p]) )
+                        {
+                            console.log('remove triangle');
+                            triangles.remove(i);
+                            i = 0;
+                        }
+                    }
+
+                    console.log('remove point');
                     points.remove(p);
                     p = 0;
                 }
