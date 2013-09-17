@@ -59,6 +59,8 @@ var hover_triangles = [];
 var selected_points = [];
 var selected_triangles = [];
 
+var active_points = [];
+
 var points = [];
 var triangles = [];
 
@@ -70,22 +72,48 @@ function run()
     loop();
 }
 
+var move_active_points = false;
+var remove_active_points = false;
+
 function mousedown(evt)
 {
     _debug.log('mousedown');
 
+    active_points = [];
     if(hover_points.length)
     {
         for(var p = 0; p < hover_points.length; p++)
         {
-            points[hover_points[p]].selected = !points[hover_points[p]].selected;
+            if(points[hover_points[p]].selected)
+            {
+                for(var s = 0; s < selected_points.length; s++)
+                {
+                    if(selected_points[s] == hover_points[s])
+                    {
+                        active_points.push(selected_points[s]);
+//                        selected_points.remove(s);
+
+                        remove_active_points = true;
+                    }
+                }
+                points[hover_points[p]].selected = false;
+            }
+            else
+            {
+                selected_points.push(hover_points[p]);
+                points[hover_points[p]].selected = true;
+
+                active_points.push(hover_points[p]);
+            }
         }
     }
     else
     {
-        // add new point
         points.push( new Point(_mouse.x, _mouse.y) );
+        active_points.push(points.length);
     }
+
+    move_active_points = false;
 }
 
 function mousemove(evt)
@@ -93,11 +121,23 @@ function mousemove(evt)
     _debug.log('mousemove');
     _mouse.mousemove(evt);
 
+    if(active_points.length)
+    {
+        move_active_points = true;
+        for(var i = 0; i < active_points.length; i++)
+        {
+            points[ active_points[i] ].x = _mouse.x;
+            points[ active_points[i] ].y = _mouse.y;
+        }
+
+        return;
+    }
+
     hover_points = [];
     for(var p = 0; p < points.length; p++)
     {
         // TODO: Add snap point to external config
-        if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 10 && !points[p].selected) // snap point
+        if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 10) // snap point
         {
             points[p].hover = true;
             hover_points.push(p);
@@ -133,6 +173,27 @@ function mousemove(evt)
 function mouseup(evt)
 {
     _debug.log('mouseup');
+
+    if(move_active_points)
+    {
+        remove_active_points = false;
+        move_active_points = false;
+
+        for(var s = 0; s < active_points.length; s++)
+        {
+            points[active_points[s]].selected = false;
+        }
+    }
+
+    if(remove_active_points)
+    {
+        for(var s = 0; s < active_points.length; s++)
+        {
+            selected_points.remove(active_points[s]);
+        }
+    }
+
+    active_points = [];
 }
 
 function keydown(evt)
