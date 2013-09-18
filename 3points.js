@@ -40,6 +40,14 @@
         };
 }());
 
+var uniqueVariable = 0;
+function unique()
+{
+    console.log('unique');
+    uniqueVariable++;
+    return uniqueVariable;
+}
+
 Array.prototype.remove = function (index) {
     this.splice(index, 1);
 };
@@ -61,40 +69,79 @@ var selected_triangles = [];
 
 var active_points = [];
 
-var points = [];
 var triangles = [];
 
-function searchPoint(point)
+function Points ()
 {
-    for(var i = 0; i < points.length; i++)
+    this.item = [];
+    this.itemHovered = [];
+    this.itemSelected = [];
+
+    this.removePoint = function(point)
     {
-        if(points[i].equal( point ))
-        {
-            return i;
-        }
+        var pos = this.searchPoint(point);
+        this.item.remove(pos);
+        this.refresh();
     }
-}
 
-function mergePoints()
-{
-    for(var i = 0; i < points.length; i++)
+    this.refresh = function()
     {
-        for(var j = 0; j < points.length; j++)
-        {
-            if(i != j) // skip self
-            {
-                // TODO: Add snap point to external config
-                if(points[i].distance(points[j]) < 9)
-                {
-                    points.remove(j);
-                    i = 0;
+        this.merge();
 
-                    break;
+        this.itemHovered = [];
+        this.itemSelected = [];
+
+        var h = 0;
+        for(var i = 0; i < this.item.length; i++)
+        {
+            if(this.item[i].hover)
+            {
+                this.itemHovered.push(this.item[i]);
+            }
+
+            if(this.item[i].selected)
+            {
+                this.itemSelected.push(this.item[i]);
+            }
+        }
+    };
+
+    this.searchPoint = function(point)
+    {
+        for(var i = 0; i < this.item.length; i++)
+        {
+            if(this.item[i].equal( point ))
+            {
+                return i;
+            }
+        }
+    };
+
+    this.merge = function()
+    {
+        for(var i = 0; i < this.item.length; i++)
+        {
+            for(var j = 0; j < this.item.length; j++)
+            {
+                if(i != j) // skip self
+                {
+                    // TODO: Add snap point to external config
+                    if(this.item[i].distance(this.item[j]) < 9)
+                    {
+                        // TODO: Search this point in triangles
+
+                        this.item.remove(j);
+                        i = 0;
+
+                        break;
+                    }
                 }
             }
         }
     }
 }
+
+var _points = new Points();
 
 function run()
 {
@@ -104,83 +151,62 @@ function run()
     loop();
 }
 
-var move_active_points = false;
-var remove_active_points = false;
-
 function mousedown(evt)
 {
     _debug.log('mousedown');
 
-    active_points = [];
-    if(hover_points.length)
+    if(_points.itemHovered.length)
     {
-        for(var p = 0; p < hover_points.length; p++)
+        for(var p = 0; p < _points.itemHovered.length; p++)
         {
-            if(points[hover_points[p]].selected)
-            {
-                for(var s = 0; s < selected_points.length; s++)
-                {
-                    if(selected_points[s] == hover_points[s])
-                    {
-                        active_points.push(selected_points[s]);
-//                        selected_points.remove(s);
-
-                        remove_active_points = true;
-                    }
-                }
-                points[hover_points[p]].selected = false;
-            }
-            else
-            {
-                selected_points.push(hover_points[p]);
-                points[hover_points[p]].selected = true;
-
-                active_points.push(hover_points[p]);
-            }
+            _mouse.snap.push( _points.item[ _points.searchPoint(_points.itemHovered[p]) ] );
         }
+
+
+        console.log('add snap');
+        _mouse.snapPositon.x = _mouse.position.x;
+        _mouse.snapPositon.y = _mouse.position.y;
     }
     else
     {
-        points.push( new Point(_mouse.x, _mouse.y) );
-        active_points.push(points.length - 1);
-
-        mergePoints();
+        _points.item.push( new Point( _mouse.position.x, _mouse.position.y) );
     }
 
-    move_active_points = false;
+    _points.refresh();
 }
 
 function mousemove(evt)
 {
     _debug.log('mousemove');
+
     _mouse.mousemove(evt);
 
-    if(active_points.length)
+    if(_mouse.snap.length)
     {
-        move_active_points = true;
-        for(var i = 0; i < active_points.length; i++)
+        for(var i = 0; i < _mouse.snap.length; i++)
         {
-            points[ active_points[i] ].x = _mouse.x;
-            points[ active_points[i] ].y = _mouse.y;
+            _mouse.snap[i].x = _mouse.position.x;
+            _mouse.snap[i].y = _mouse.position.y;
         }
 
         return;
     }
 
-    hover_points = [];
-    for(var p = 0; p < points.length; p++)
+//    hover_points = [];
+    for(var p = 0; p < _points.item.length; p++)
     {
         // TODO: Add snap point to external config
-        if(points[p].distance(new Point(_mouse.x, _mouse.y)) < 9) // snap point
+        if(_points.item[p].distance( _mouse.position ) < 9) // snap point
         {
-            points[p].hover = true;
-            hover_points.push(p);
+            _points.item[p].hover = true;
         }
         else
         {
-            points[p].hover = false;
+            _points.item[p].hover = false;
         }
     }
+
+    _points.refresh();
 
     switch(_keyCode)
     {
@@ -189,7 +215,7 @@ function mousemove(evt)
             for(var t = 0; t < triangles.length; t++)
             {
                 // TODO: Add snap point to external config
-                if(triangles[t].pointInTriangle(new Point(_mouse.x, _mouse.y))) // snap point
+                if(triangles[t].pointInTriangle( _mouse.position )) // snap point
                 {
                     triangles[t].hover = true;
                 }
@@ -208,28 +234,17 @@ function mouseup(evt)
 {
     _debug.log('mouseup');
 
-    if(move_active_points)
+    if(_mouse.snap.length)
     {
-        remove_active_points = false;
-        move_active_points = false;
-
-        for(var s = 0; s < active_points.length; s++)
+        for(var s = 0; s < _mouse.snap.length; s++)
         {
-            points[active_points[s]].selected = false;
+            _mouse.snap[s].selected = _mouse.position.equal( _mouse.snapPositon) ? true : false;
         }
     }
 
-    if(remove_active_points)
-    {
-        for(var s = 0; s < active_points.length; s++)
-        {
-            selected_points.remove(active_points[s]);
-        }
-    }
+    _mouse.snap = [];
 
-    active_points = [];
-
-    mergePoints();
+    _points.refresh();
 }
 
 function keydown(evt)
@@ -242,10 +257,10 @@ function keydown(evt)
     {
         case 67:    // c - clear
         {
-            for(var p = 0; p < points.length; p++)
+            for(var p = 0; p < _points.item.length; p++)
             {
-                points[p].hover = false;
-                points[p].selected = false;
+                _points.item[p].hover = false;
+                _points.item[p].selected = false;
             }
 
             break;
@@ -253,28 +268,31 @@ function keydown(evt)
 
         case 88:    // x - remove point
         {
-            for(var p = 0; p < points.length; p++)
+            var pointToRemove = [];
+            for(var p = 0; p < _points.itemSelected.length; p++)
             {
-                if(points[p].selected)
-                {
-                    // validate triangles
-                    for(var i = 0; i < triangles.length; i++)
-                    {
-                        console.log('a ' + triangles[i].a.equal(points[p]) + ' b ' + triangles[i].b.equal(points[p]) + ' c ' + triangles[i].c.equal(points[p]))
-                        if( triangles[i].a.equal(points[p]) ||
-                            triangles[i].b.equal(points[p]) ||
-                            triangles[i].c.equal(points[p]) )
-                        {
-                            console.log('remove triangle');
-                            triangles.remove(i);
-                            i = 0;
-                        }
-                    }
+//                    // validate triangles
+//                    for(var i = 0; i < triangles.length; i++)
+//                    {
+//                        console.log('a ' + triangles[i].a.equal(points[p]) + ' b ' + triangles[i].b.equal(points[p]) + ' c ' + triangles[i].c.equal(points[p]))
+//                        if( triangles[i].a.equal(points[p]) ||
+//                            triangles[i].b.equal(points[p]) ||
+//                            triangles[i].c.equal(points[p]) )
+//                        {
+//                            console.log('remove triangle');
+//                            triangles.remove(i);
+//                            i = 0;
+//                        }
+//                    }
 
-                    console.log('remove point');
-                    points.remove(p);
-                    p = 0;
-                }
+                console.log('prepare points to remove');
+                pointToRemove.push(_points.itemSelected[p]);
+            }
+
+            for(var p = 0; p < pointToRemove.length; p++)
+            {
+                console.log('remove point');
+                _points.removePoint( pointToRemove[p] );
             }
 
             break;
@@ -282,42 +300,39 @@ function keydown(evt)
 
         case 84:    // t - create triangle
         {
-            var selected_points = [];
-            for(var p = 0; p < points.length; p++)
-            {
-                if(points[p].selected)
-                {
-                    selected_points.push(p);
-                }
-            }
 
-            if(selected_points.length == 3)
+            if(_points.itemSelected.length == 3)
             {
-                _debug.log('New triangle');
+                triangles.push( new Triangle(
+                    _points.itemSelected[0],
+                    _points.itemSelected[1],
+                    _points.itemSelected[2]
+                ) );
 
-                triangles.push( new Triangle( points[selected_points[0]], points[selected_points[1]], points[selected_points[2]] ) );
-                for(var p = 0; p < selected_points.length; p++)
+                for(var p = 0; p < _points.itemSelected.length; p++)
                 {
-                    points[selected_points[p]].selected = false;
+                    _points.item[ _points.searchPoint(_points.itemSelected[p]) ].selected = false;
                 }
             }
             else
             {
-                _debug.log('Invalid point count ' + selected_points);
+                _debug.log('Invalid point count ' + _points.itemSelected.length);
             }
 
             break;
         }
     }
+
+    _points.refresh();
 }
 
 function keyup(evt)
 {
     _keyCode = false;
 
-    for(var p = 0; p < points.length; p++)
+    for(var p = 0; p < _points.item.length; p++)
     {
-        points[p].hover = false;
+        _points.item[p].hover = false;
     }
 
     for(var t = 0; t < triangles.length; t++)
@@ -356,7 +371,8 @@ function resize()
 
 function loop()
 {
-    requestAnimationFrame(loop);
+//    requestAnimationFrame(loop);
+    setInterval("draw()", 1000/10);
     draw();
 }
 
@@ -374,8 +390,8 @@ function draw()
         triangles[t].draw();
     }
 
-    for(var p = 0; p < points.length; p++)
+    for(var p = 0; p < _points.item.length; p++)
     {
-        points[p].draw();
+        _points.item[p].draw();
     }
 }

@@ -8,6 +8,7 @@
 
 function Point(x, y)
 {
+    this.id = unique();
     this.x = x;
     this.y = y;
 
@@ -38,7 +39,7 @@ function Point(x, y)
     this.equal = function(point)
     {
         console.log('equal x ' + this.x + ', ' + this.y + ' vs ' + point.x + ', ' + point.y);
-        return (this.x == point.x && this.y == point.y) ? true : false;
+        return (this.x == point.x && this.y == point.y);
     };
 
     this.distance = function(point)

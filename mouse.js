@@ -8,12 +8,14 @@
 
 function Mouse()
 {
-    this.x = 0;
-    this.y = 0;
+    this.position = new Point(0, 0);
+
+    this.snapPositon = new Point(0, 0);
+    this.snap = [];
 
     this.mousemove = function (evt)
     {
-        this.x = evt.pageX;
-        this.y = evt.pageY;
+        this.position.x = evt.pageX;
+        this.position.y = evt.pageY;
     }
 }
