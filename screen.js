@@ -27,6 +27,24 @@ function Screen () {
         }
     };
 
+    this.upScale = function()
+    {
+        for(var i = 0; i < _points.item.length; i++)
+        {
+            _points.item[i].x *= 1.25;
+            _points.item[i].y *= 1.25;
+        }
+    };
+
+    this.downScale = function()
+    {
+        for(var i = 0; i < _points.item.length; i++)
+        {
+            _points.item[i].x /= 1.25;
+            _points.item[i].y /= 1.25;
+        }
+    };
+
     this.move = function(point)
     {
         var mx = _mouse.position.x - _mouse.lastPosition.x;

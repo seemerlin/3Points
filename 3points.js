@@ -321,6 +321,23 @@ function keyup(evt)
     _debug.log('keyup');
 }
 
+function onmousewheel(evt)
+{
+    var e = window.event || e; // old IE support
+    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+
+    if(delta > 0)
+    {
+        _screen.upScale();
+    }
+    else
+    {
+        _screen.downScale();
+    }
+
+    console.log(delta/10);
+}
+
 function init()
 {
     _canvas = document.getElementById('c');
@@ -333,6 +350,18 @@ function init()
 
     document.onkeydown = keydown;
     document.onkeyup = keyup;
+
+    if (document.addEventListener)
+    {
+        // IE9, Chrome, Safari, Opera
+        document.addEventListener("mousewheel", onmousewheel, false);
+        // Firefox
+        document.addEventListener("DOMMouseScroll", onmousewheel, false);
+    }
+    else
+    {
+        document.attachEvent("onmousewheel", onmousewheel);
+    }
 }
 
 function resize()
