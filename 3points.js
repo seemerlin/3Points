@@ -162,8 +162,6 @@ function mousedown(evt)
             _mouse.snap.push( _points.item[ _points.searchPoint(_points.itemHovered[p]) ] );
         }
 
-
-        console.log('add snap');
         _mouse.snapPositon.x = _mouse.position.x;
         _mouse.snapPositon.y = _mouse.position.y;
     }
@@ -238,7 +236,14 @@ function mouseup(evt)
     {
         for(var s = 0; s < _mouse.snap.length; s++)
         {
-            _mouse.snap[s].selected = _mouse.position.equal( _mouse.snapPositon) ? true : false;
+            if( !_mouse.snap[s].selected )
+            {
+                _mouse.snap[s].selected = _mouse.position.equal( _mouse.snapPositon) ? true : false;
+            }
+            else
+            {
+                _mouse.snap[s].selected = false;
+            }
         }
     }
 
