@@ -259,6 +259,18 @@ function keydown(evt)
 
     switch(evt.keyCode)
     {
+        case 32:    // space - select all
+        {
+            for(var p = 0; p < _points.item.length; p++)
+            {
+                _points.item[p].selected = true;
+            }
+
+            _points.refresh();
+
+            break;
+        }
+
         case 67:    // c - clear
         {
             for(var p = 0; p < _points.item.length; p++)
