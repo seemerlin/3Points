@@ -9,12 +9,16 @@
 function Mouse()
 {
     this.position = new Point(0, 0);
+    this.lastPosition = new Point(0, 0);
 
     this.snapPositon = new Point(0, 0);
     this.snap = [];
 
     this.mousemove = function (evt)
     {
+        this.lastPosition.x = this.position.x;
+        this.lastPosition.y = this.position.y;
+
         this.position.x = evt.pageX;
         this.position.y = evt.pageY;
     }

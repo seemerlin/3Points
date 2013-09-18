@@ -129,6 +129,13 @@ function mousemove(evt)
 
     switch(_keyCode)
     {
+        case 77: // m - move world
+        {
+            _screen.move(_mouse.position);
+
+            break;
+        }
+
         case 70: // f - select triangle
         {
             for(var t = 0; t < _triangles.item.length; t++)
