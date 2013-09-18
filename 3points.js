@@ -110,7 +110,7 @@ function Points ()
     {
         for(var i = 0; i < this.item.length; i++)
         {
-            if(this.item[i].equal( point ))
+            if(this.item[i].id == point.id)
             {
                 return i;
             }
@@ -128,8 +128,7 @@ function Points ()
                     // TODO: Add snap point to external config
                     if(this.item[i].distance(this.item[j]) < 9)
                     {
-                        // TODO: Search this point in triangles
-
+                        // TODO: Replace point id in triangles
                         this.item.remove(j);
                         i = 0;
 
@@ -271,27 +270,73 @@ function keydown(evt)
             break;
         }
 
+        case 90:    // z - remove triangle
+        {
+            var trianglesToRemove = [];
+
+            for(var p = 0; p < _points.itemSelected.length; p++)
+            {
+                // validate triangles
+                for(var i = 0; i < triangles.length; i++)
+                {
+                    if( triangles[i].a.id == _points.itemSelected[p].id ||
+                        triangles[i].b.id == _points.itemSelected[p].id ||
+                        triangles[i].c.id == _points.itemSelected[p].id )
+                    {
+                        trianglesToRemove.push( triangles[i] );
+                    }
+                }
+            }
+
+            for(var t = 0; t < trianglesToRemove.length; t++)
+            {
+                for(var x = 0; x < triangles.length; x++)
+                {
+                    if( triangles[x].id == trianglesToRemove[t].id )
+                    {
+                        console.log('remove triangle ' + x);
+                        triangles.remove(x);
+                    }
+                }
+            }
+
+            break;
+        }
+
         case 88:    // x - remove point
         {
             var pointToRemove = [];
+            var trianglesToRemove = [];
+
             for(var p = 0; p < _points.itemSelected.length; p++)
             {
-//                    // validate triangles
-//                    for(var i = 0; i < triangles.length; i++)
-//                    {
-//                        console.log('a ' + triangles[i].a.equal(points[p]) + ' b ' + triangles[i].b.equal(points[p]) + ' c ' + triangles[i].c.equal(points[p]))
-//                        if( triangles[i].a.equal(points[p]) ||
-//                            triangles[i].b.equal(points[p]) ||
-//                            triangles[i].c.equal(points[p]) )
-//                        {
-//                            console.log('remove triangle');
-//                            triangles.remove(i);
-//                            i = 0;
-//                        }
-//                    }
+                // validate triangles
+                for(var i = 0; i < triangles.length; i++)
+                {
+                    if( triangles[i].a.id == _points.itemSelected[p].id ||
+                        triangles[i].b.id == _points.itemSelected[p].id ||
+                        triangles[i].c.id == _points.itemSelected[p].id )
+                    {
+                        trianglesToRemove.push( triangles[i] );
+                    }
+                }
 
-                console.log('prepare points to remove');
-                pointToRemove.push(_points.itemSelected[p]);
+                pointToRemove.push( _points.itemSelected[p] );
+            }
+
+            console.log(triangles);
+            console.log(trianglesToRemove);
+
+            for(var t = 0; t < trianglesToRemove.length; t++)
+            {
+                for(var x = 0; x < triangles.length; x++)
+                {
+                    if( triangles[x].id == trianglesToRemove[t].id )
+                    {
+                        console.log('remove triangle ' + x);
+                        triangles.remove(x);
+                    }
+                }
             }
 
             for(var p = 0; p < pointToRemove.length; p++)
@@ -299,6 +344,8 @@ function keydown(evt)
                 console.log('remove point');
                 _points.removePoint( pointToRemove[p] );
             }
+
+            _points.refresh();
 
             break;
         }
@@ -314,9 +361,9 @@ function keydown(evt)
                     _points.itemSelected[2]
                 ) );
 
-                for(var p = 0; p < _points.itemSelected.length; p++)
+                for(var p = 0; p < _points.item.length; p++)
                 {
-                    _points.item[ _points.searchPoint(_points.itemSelected[p]) ].selected = false;
+                    _points.item[ p ].selected = false;
                 }
             }
             else

@@ -8,6 +8,7 @@
 
 function Triangle(a, b, c)
 {
+    this.id = unique();
     this.a = a;
     this.b = b;
     this.c = c;
