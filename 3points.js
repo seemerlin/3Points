@@ -80,7 +80,7 @@ function mousedown(evt)
     {
         for(var p = 0; p < _points.itemHovered.length; p++)
         {
-            _mouse.snap.push( _points.item[ _points.searchPoint(_points.itemHovered[p]) ] );
+            _mouse.snap.push( _points.item[ _points.searchPointById(_points.itemHovered[p].id) ] );
         }
 
         _mouse.snapPositon.x = _mouse.position.x;
@@ -102,6 +102,7 @@ function mousemove(evt)
 
     if(_mouse.snap.length)
     {
+        console.log(_mouse.snap);
         for(var i = 0; i < _mouse.snap.length; i++)
         {
             _mouse.snap[i].x = _mouse.position.x;
@@ -222,9 +223,9 @@ function keydown(evt)
                 // validate triangles
                 for(var i = 0; i < _triangles.item.length; i++)
                 {
-                    if( _triangles.item[i].a.id == _points.itemSelected[p].id ||
-                        _triangles.item[i].b.id == _points.itemSelected[p].id ||
-                        _triangles.item[i].c.id == _points.itemSelected[p].id )
+                    if( _triangles.item[i].a_id == _points.itemSelected[p].id ||
+                        _triangles.item[i].b_id == _points.itemSelected[p].id ||
+                        _triangles.item[i].c_id == _points.itemSelected[p].id )
                     {
                         trianglesToRemove.push( _triangles.item[i] );
                     }
@@ -249,9 +250,9 @@ function keydown(evt)
                 // validate triangles
                 for(var i = 0; i < _triangles.item.length; i++)
                 {
-                    if( _triangles.item[i].a.id == _points.itemSelected[p].id ||
-                        _triangles.item[i].b.id == _points.itemSelected[p].id ||
-                        _triangles.item[i].c.id == _points.itemSelected[p].id )
+                    if( _triangles.item[i].a_id == _points.itemSelected[p].id ||
+                        _triangles.item[i].b_id == _points.itemSelected[p].id ||
+                        _triangles.item[i].c_id == _points.itemSelected[p].id )
                     {
                         trianglesToRemove.push( _triangles.item[i] );
                     }
@@ -378,10 +379,29 @@ function resize()
 
 function loop()
 {
-//    requestAnimationFrame(loop);
     setInterval("draw()", 1000/10);
-    draw();
 }
+
+//function hex(color){
+//    return color.toString(16) + '' + color.toString(16);
+//}
+//
+//var col = new Image();
+//col.src = 'colormap.gif';
+//
+//function colors()
+//{
+//    _context.beginPath();
+//    _context.strokeStyle = '#000';
+//    _context.rect(_screen.width - 250, 0, 250, _screen.height);
+//    _context.stroke();
+//    _context.closePath();
+//
+//     if(col)
+//     {
+//        _context.drawImage(col, _screen.width - col.width - 10, _screen.height - col.height - 10, col.width, col.height);
+//     }
+//}
 
 function draw()
 {
@@ -401,4 +421,6 @@ function draw()
     {
         _points.item[p].draw();
     }
+
+//    colors();
 }
