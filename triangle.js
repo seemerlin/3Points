@@ -14,6 +14,8 @@ function Triangle(a, b, c)
     this.b_id = b.id;
     this.c_id = c.id;
 
+    this.color = new RGB(255,255,255);
+
     this.hover = false;
     this.selected = false;
 
@@ -35,8 +37,8 @@ function Triangle(a, b, c)
     this.draw = function()
     {
         var color =  'rgba(33,33,33,.5);';
+        if(this.selected) color = 'rgba(255,0,0,.5);';
         if(this.hover) color = 'rgba(0,255,0,.5);';
-        if(this.selected) color = 'rgba(0,0,255.5);';
 
         var a = this.getA();
         var b = this.getB();
@@ -48,8 +50,10 @@ function Triangle(a, b, c)
         _context.lineTo(c.x, c.y);
         _context.lineTo(a.x, a.y);
         _context.strokeStyle = color;
-        _context.lineHeight = 0.5;
+        _context.fillStyle = this.color.rgb();
+        _context.lineHeight = 1;
         _context.stroke();
+        _context.fill();
         _context.closePath();
     };
 

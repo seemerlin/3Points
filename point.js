@@ -22,7 +22,6 @@ function Point(x, y)
 
         var color =  'rgb(255,0,0);';
         if(this.selected) color = 'rgb(0,0,255);';
-
         if(this.hover) color = 'rgb(255,0,0);';
 
         if(this.hover || this.selected)

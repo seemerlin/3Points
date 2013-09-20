@@ -64,6 +64,8 @@ var _keyCode = false;
 var _points = new Points();
 var _triangles = new Triangles();
 
+var _colors = new ColorMap();
+
 function run()
 {
     init();
@@ -76,22 +78,44 @@ function mousedown(evt)
 {
     _debug.log('mousedown');
 
-    if(_points.itemHovered.length)
+    if( !_colors.getColor() )
     {
-        for(var p = 0; p < _points.itemHovered.length; p++)
+        if(_points.itemHovered.length || _triangles.itemHovered.length)
         {
-            _mouse.snap.push( _points.item[ _points.searchPointById(_points.itemHovered[p].id) ] );
-        }
+            if(_points.itemHovered.length)
+            {
+                for(var p = 0; p < _points.itemHovered.length; p++)
+                {
+                    _mouse.snap.push( _points.item[ _points.searchPointById(_points.itemHovered[p].id) ] );
+                }
 
-        _mouse.snapPositon.x = _mouse.position.x;
-        _mouse.snapPositon.y = _mouse.position.y;
-    }
-    else
-    {
-        _points.item.push( new Point( _mouse.position.x, _mouse.position.y) );
+                _mouse.snapPositon.x = _mouse.position.x;
+                _mouse.snapPositon.y = _mouse.position.y;
+            }
+
+            if(_triangles.itemHovered.length)
+            {
+                for(var t = 0; t < _triangles.itemHovered.length; t++)
+                {
+                    if(_triangles.itemHovered[t].selected)
+                    {
+                        _triangles.itemHovered[t].selected = false;
+                    }
+                    else
+                    {
+                        _triangles.itemHovered[t].selected = true;
+                    }
+                }
+            }
+        }
+        else
+        {
+            _points.item.push( new Point( _mouse.position.x, _mouse.position.y) );
+        }
     }
 
     _points.refresh();
+    _triangles.refresh();
 }
 
 function mousemove(evt)
@@ -181,6 +205,7 @@ function mouseup(evt)
     _mouse.snap = [];
 
     _points.refresh();
+    _triangles.refresh();
 }
 
 function keydown(evt)
@@ -209,6 +234,12 @@ function keydown(evt)
             {
                 _points.item[p].hover = false;
                 _points.item[p].selected = false;
+            }
+
+            for(var t= 0; t < _triangles.item.length; t++)
+            {
+                _triangles.item[t].hover = false;
+                _triangles.item[t].selected = false;
             }
 
             break;
@@ -273,6 +304,7 @@ function keydown(evt)
             }
 
             _points.refresh();
+            _triangles.refresh();
 
             break;
         }
@@ -382,27 +414,6 @@ function loop()
     setInterval("draw()", 1000/10);
 }
 
-//function hex(color){
-//    return color.toString(16) + '' + color.toString(16);
-//}
-//
-//var col = new Image();
-//col.src = 'colormap.gif';
-//
-//function colors()
-//{
-//    _context.beginPath();
-//    _context.strokeStyle = '#000';
-//    _context.rect(_screen.width - 250, 0, 250, _screen.height);
-//    _context.stroke();
-//    _context.closePath();
-//
-//     if(col)
-//     {
-//        _context.drawImage(col, _screen.width - col.width - 10, _screen.height - col.height - 10, col.width, col.height);
-//     }
-//}
-
 function draw()
 {
     _context.fillStyle = "rgb(255,255,255)";
@@ -422,5 +433,5 @@ function draw()
         _points.item[p].draw();
     }
 
-//    colors();
+    _colors.draw();
 }
